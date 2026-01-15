@@ -1,0 +1,251 @@
+generator client {
+  provider = "prisma-client"
+  //output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model appointment_answers {
+  apa_id             BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  apa_answer         String       @db.VarChar(255)
+  question_que_id    BigInt       @db.UnsignedBigInt
+  appointment_app_id BigInt       @db.UnsignedBigInt
+  appointments       appointments @relation(fields: [appointment_app_id], references: [app_id], onDelete: Cascade, onUpdate: Restrict, map: "appointment_answers_appointment_app_id_foreign")
+  questions          questions    @relation(fields: [question_que_id], references: [que_id], onDelete: Cascade, onUpdate: Restrict, map: "appointment_answers_question_que_id_foreign")
+
+  @@index([appointment_app_id], map: "appointment_answers_appointment_app_id_foreign")
+  @@index([question_que_id], map: "appointment_answers_question_que_id_foreign")
+}
+
+model appointments {
+  app_id                      BigInt                        @id @default(autoincrement()) @db.UnsignedBigInt
+  app_date                    DateTime                      @db.Date
+  app_diagnosis               String                        @db.VarChar(255)
+  patient_pat_id              BigInt?                       @db.UnsignedBigInt
+  doctor_doc_id               BigInt?                       @db.UnsignedBigInt
+  appointment_answers         appointment_answers[]
+  doctors                     doctors?                      @relation(fields: [doctor_doc_id], references: [doc_id], onDelete: Cascade, onUpdate: Restrict, map: "appointments_doctor_doc_id_foreign")
+  patients                    patients?                     @relation(fields: [patient_pat_id], references: [pat_id], onDelete: Cascade, onUpdate: Restrict, map: "appointments_patient_pat_id_foreign")
+  appointments_in_comparisons appointments_in_comparisons[]
+
+  @@index([doctor_doc_id], map: "appointments_doctor_doc_id_foreign")
+  @@index([patient_pat_id], map: "appointments_patient_pat_id_foreign")
+}
+
+model appointments_in_comparisons {
+  aic_id                   BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  appointment_app_id       BigInt             @db.UnsignedBigInt
+  report_comparison_rec_id BigInt             @db.UnsignedBigInt
+  appointments             appointments       @relation(fields: [appointment_app_id], references: [app_id], onDelete: Cascade, onUpdate: Restrict, map: "appointments_in_comparisons_appointment_app_id_foreign")
+  report_comparisons       report_comparisons @relation(fields: [report_comparison_rec_id], references: [rec_id], onDelete: Cascade, onUpdate: Restrict, map: "appointments_in_comparisons_report_comparison_rec_id_foreign")
+
+  @@index([appointment_app_id], map: "appointments_in_comparisons_appointment_app_id_foreign")
+  @@index([report_comparison_rec_id], map: "appointments_in_comparisons_report_comparison_rec_id_foreign")
+}
+
+model cache {
+  key        String @id @db.VarChar(255)
+  value      String @db.MediumText
+  expiration Int
+}
+
+model cache_locks {
+  key        String @id @db.VarChar(255)
+  owner      String @db.VarChar(255)
+  expiration Int
+}
+
+model doctor_patients {
+  dop_id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  doctor_doc_id  BigInt   @db.UnsignedBigInt
+  patient_pat_id BigInt   @db.UnsignedBigInt
+  dop_status     String   @default("pending") @db.VarChar(255)
+  doctors        doctors  @relation(fields: [doctor_doc_id], references: [doc_id], onDelete: Cascade, onUpdate: Restrict, map: "doctor_patients_doctor_doc_id_foreign")
+  patients       patients @relation(fields: [patient_pat_id], references: [pat_id], onDelete: Cascade, onUpdate: Restrict, map: "doctor_patients_patient_pat_id_foreign")
+
+  @@index([doctor_doc_id], map: "doctor_patients_doctor_doc_id_foreign")
+  @@index([patient_pat_id], map: "doctor_patients_patient_pat_id_foreign")
+}
+
+model doctors {
+  doc_id          BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  doc_crm         String            @db.VarChar(255)
+  appointments    appointments[]
+  doctor_patients doctor_patients[]
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model job_batches {
+  id             String  @id @db.VarChar(255)
+  name           String  @db.VarChar(255)
+  total_jobs     Int
+  pending_jobs   Int
+  failed_jobs    Int
+  failed_job_ids String  @db.LongText
+  options        String? @db.MediumText
+  cancelled_at   Int?
+  created_at     Int
+  finished_at    Int?
+}
+
+model jobs {
+  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  queue        String @db.VarChar(255)
+  payload      String @db.LongText
+  attempts     Int    @db.UnsignedTinyInt
+  reserved_at  Int?   @db.UnsignedInt
+  available_at Int    @db.UnsignedInt
+  created_at   Int    @db.UnsignedInt
+
+  @@index([queue], map: "jobs_queue_index")
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model password_reset_tokens {
+  email      String    @id @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+}
+
+model patient_domain_reports {
+  pdr_id                BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  pdr_domain            String           @db.VarChar(255)
+  pdr_score             Int
+  patient_report_par_id BigInt           @db.UnsignedBigInt
+  pdr_weekday           String?          @db.VarChar(255)
+  patient_reports       patient_reports  @relation(fields: [patient_report_par_id], references: [par_id], onDelete: Cascade, onUpdate: Restrict, map: "patient_domain_reports_patient_report_par_id_foreign")
+  report_answers        report_answers[]
+
+  @@index([patient_report_par_id], map: "patient_domain_reports_patient_report_par_id_foreign")
+}
+
+model patient_reports {
+  par_id                 BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
+  par_period_starts      DateTime                 @db.Date
+  par_period_end         DateTime                 @db.Date
+  par_status             String                   @db.VarChar(255)
+  par_medication         String                   @db.VarChar(255)
+  par_score              Int
+  par_cli_resume         String                   @db.Text
+  par_type               String                   @db.VarChar(255)
+  patient_pat_id         BigInt                   @db.UnsignedBigInt
+  par_observation        String?                  @db.Text
+  patient_domain_reports patient_domain_reports[]
+  patients               patients                 @relation(fields: [patient_pat_id], references: [pat_id], onDelete: Cascade, onUpdate: Restrict, map: "patient_reports_pat_id_foreign")
+  reports_in_comparisons reports_in_comparisons[]
+
+  @@index([patient_pat_id], map: "patient_reports_pat_id_foreign")
+}
+
+model patients {
+  pat_id                      BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  pat_disease_discover_date   DateTime?         @db.Date
+  pat_stopped_treatment       Boolean?
+  pat_streak                  Int?
+  pat_gave_informed_diagnosis Boolean?
+  pat_hundred_days            Boolean?
+  pat_two_hundred_days        Boolean?
+  pat_three_hundred_days      Boolean?
+  pat_gender                  String?           @db.VarChar(255)
+  appointments                appointments[]
+  doctor_patients             doctor_patients[]
+  patient_reports             patient_reports[]
+}
+
+model personal_access_tokens {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tokenable_type String    @db.VarChar(255)
+  tokenable_id   BigInt    @db.UnsignedBigInt
+  name           String    @db.Text
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @db.Timestamp(0)
+  expires_at     DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([expires_at], map: "personal_access_tokens_expires_at_index")
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+model questions {
+  que_id              BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  que_name            String                @db.VarChar(255)
+  que_domain          String                @db.VarChar(255)
+  que_index           Int
+  created_at          DateTime?             @db.Timestamp(0)
+  updated_at          DateTime?             @db.Timestamp(0)
+  appointment_answers appointment_answers[]
+  report_answers      report_answers[]
+}
+
+model report_answers {
+  rea_id                       BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  rea_value                    Int
+  rea_week_day                 String                 @db.VarChar(255)
+  question_que_id              BigInt                 @db.UnsignedBigInt
+  patient_domain_report_pdr_id BigInt                 @db.UnsignedBigInt
+  patient_domain_reports       patient_domain_reports @relation(fields: [patient_domain_report_pdr_id], references: [pdr_id], onDelete: Cascade, onUpdate: Restrict, map: "report_answers_patient_domain_report_pdr_id_foreign")
+  questions                    questions              @relation(fields: [question_que_id], references: [que_id], onDelete: Cascade, onUpdate: Restrict, map: "report_answers_question_que_id_foreign")
+
+  @@index([patient_domain_report_pdr_id], map: "report_answers_patient_domain_report_pdr_id_foreign")
+  @@index([question_que_id], map: "report_answers_question_que_id_foreign")
+}
+
+model report_comparisons {
+  rec_id                      BigInt                        @id @default(autoincrement()) @db.UnsignedBigInt
+  rec_ia_analysis             String                        @db.Text
+  appointments_in_comparisons appointments_in_comparisons[]
+  reports_in_comparisons      reports_in_comparisons[]
+}
+
+model reports_in_comparisons {
+  ric_id                   BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  patient_report_par_id    BigInt             @db.UnsignedBigInt
+  report_comparison_rec_id BigInt             @db.UnsignedBigInt
+  patient_reports          patient_reports    @relation(fields: [patient_report_par_id], references: [par_id], onDelete: Cascade, onUpdate: Restrict, map: "reports_in_comparisons_patient_report_par_id_foreign")
+  report_comparisons       report_comparisons @relation(fields: [report_comparison_rec_id], references: [rec_id], onDelete: Cascade, onUpdate: Restrict, map: "reports_in_comparisons_report_comparison_rec_id_foreign")
+
+  @@index([patient_report_par_id], map: "reports_in_comparisons_patient_report_par_id_foreign")
+  @@index([report_comparison_rec_id], map: "reports_in_comparisons_report_comparison_rec_id_foreign")
+}
+
+model sessions {
+  id            String  @id @db.VarChar(255)
+  user_id       BigInt? @db.UnsignedBigInt
+  ip_address    String? @db.VarChar(45)
+  user_agent    String? @db.Text
+  payload       String  @db.LongText
+  last_activity Int
+
+  @@index([last_activity], map: "sessions_last_activity_index")
+  @@index([user_id], map: "sessions_user_id_index")
+}
+
+model users {
+  usr_id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  usr_name              String?   @db.VarChar(255)
+  usr_email             String?   @unique(map: "users_usr_email_unique") @db.VarChar(255)
+  usr_password          String?   @db.VarChar(255)
+  usr_role              String?   @db.VarChar(255)
+  usr_represented_agent Int?
+  usr_created_at        DateTime? @db.Date
+  usr_updated_at        DateTime? @db.Date
+  usr_cpf               String?   @db.VarChar(255)
+}
