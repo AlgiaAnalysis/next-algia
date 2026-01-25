@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { AuthController } from '@/controllers/Auth.controller'
 import { cookies } from 'next/headers'
-import { decrypt } from '@/lib/crypto/tripleDES'
-import { passwordDecrypt } from '@/lib/crypto/password'
+import { TripleDES } from '@/lib/crypto/tripleDES'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { email, password } = body
+    const tripleDES = new TripleDES()
 
     // Validacao basica
     if (!email || !password) {
@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     if (user?.usr_password) {
       console.log('[DEBUG] Senha criptografada do banco:', user.usr_password.substring(0, 50) + '...')
       try {
-        const afterPasswordDecrypt = passwordDecrypt(user.usr_password)
+        const afterPasswordDecrypt = tripleDES.decrypt(user.usr_password)
         console.log('[DEBUG] Apos passwordDecrypt (base64):', afterPasswordDecrypt)
-        const decryptedPwd = decrypt(user.usr_password)
+        const decryptedPwd = tripleDES.decrypt(user.usr_password)
         console.log('[DEBUG] Senha descriptografada:', decryptedPwd)
         console.log('[DEBUG] Senha fornecida:', password)
         console.log('[DEBUG] Match:', decryptedPwd === password)

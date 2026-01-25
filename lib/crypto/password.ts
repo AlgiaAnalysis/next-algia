@@ -1,65 +1,68 @@
-/**
- * Classe de criptografia baseada no sistema legado PHP
- * Converte caracteres para codigos ASCII com ofuscacao
- */
+// src/utils/Password.ts
 
-const CHARACTERS = [
-  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-  'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'm',
-  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-]
+export class Password {
+  private caracteres: string[] = [
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "m", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+  ];
 
-/**
- * Preenche uma string com zeros a esquerda
- */
-function zeroFill(str: string, size: number): string {
-  const length = size - str.length
-  let zeros = ''
-  for (let i = 0; i < length; i++) {
-    zeros += '0'
-  }
-  return zeros + str
-}
+  /**
+   * "Criptografa" uma string convertendo os caracteres alfanuméricos
+   * em pseudo-códigos ASCII modificados.
+   * @param senha - String a ser convertida
+   * @returns String criptografada
+   */
+  cript(senha: string): string {
+    let stringASC = "";
 
-/**
- * Criptografa uma string convertendo caracteres para codigos ASCII
- */
-export function passwordCrypt(password: string): string {
-  let stringASC = ''
+    for (let i = 0; i < senha.length; i++) {
+      const asc = senha.charCodeAt(i);
+      const convertido = (asc * 8 / 4) + 38;
+      const rnd = Math.floor(Math.random() * 52);
+      stringASC += this.zeroFill(convertido.toString(), 3);
+      stringASC += this.caracteres[rnd];
+    }
 
-  for (let i = 0; i < password.length; i++) {
-    const char = password.charAt(i)
-    let asc = (char.charCodeAt(0) * 8 / 4) + 38
-    const rnd = Math.floor(Math.random() * 52)
-    stringASC += zeroFill(String(Math.floor(asc)), 3)
-    stringASC += CHARACTERS[rnd]
+    return stringASC;
   }
 
-  return stringASC
-}
+  /**
+   * Descriptografa a string retornando ao texto original.
+   * @param string - String criptografada
+   * @returns String original
+   */
+  deCript(string: string): string {
+    let limpa = string;
+    this.caracteres.forEach(c => {
+      limpa = limpa.split(c).join("");
+    });
 
-/**
- * Descriptografa uma string convertendo codigos ASCII para caracteres
- */
-export function passwordDecrypt(encrypted: string): string {
-  let stringASC = ''
+    const nroCaracteres = limpa.length / 3;
+    let resultado = "";
 
-  // Remove todos os caracteres alfabeticos
-  let cleaned = encrypted
-  for (const char of CHARACTERS) {
-    cleaned = cleaned.split(char).join('')
+    for (let i = 0; i < nroCaracteres; i++) {
+      const inicio = i * 3;
+      const ascPart = limpa.substring(inicio, inicio + 3);
+      const valor = parseInt(ascPart);
+      const original = (valor - 38) * 4 / 8;
+      resultado += String.fromCharCode(original);
+    }
+
+    return resultado;
   }
 
-  const numChars = cleaned.length / 3
-
-  for (let i = 0; i < numChars; i++) {
-    const start = i * 3
-    const ascStr = cleaned.substring(start, start + 3)
-    const asc = (parseInt(ascStr, 10) - 38) * 4 / 8
-    const char = String.fromCharCode(asc)
-    stringASC += char
+  /**
+   * Adiciona zeros à esquerda até o tamanho definido.
+   * @param value - String numérica
+   * @param size - Tamanho final
+   * @returns String com zeros à esquerda
+   */
+  private zeroFill(value: string, size: number): string {
+    let zeros = "";
+    const length = size - value.length;
+    for (let i = 0; i < length; i++) {
+      zeros += "0";
+    }
+    return zeros + value;
   }
-
-  return stringASC
 }

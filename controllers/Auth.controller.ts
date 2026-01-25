@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma'
-import { comparePassword, decrypt } from '@/lib/crypto/tripleDES'
 import type { users, patients, doctors } from '@prisma/client'
 
 export type UserRole = 'patient' | 'doctor' | 'admin'
@@ -69,7 +68,7 @@ export class AuthController {
             }
         }
 
-        const isPasswordValid = comparePassword(password, user.usr_password)
+        const isPasswordValid = password === user.usr_password
 
         if (!isPasswordValid) {
             return {
