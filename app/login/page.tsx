@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Mail, Lock, Loader2, HeartPulse, GitBranch, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, Loader2, HeartPulse, GitBranch, AlertCircle, Home, User, Stethoscope } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -113,8 +113,36 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4">
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 relative">
       <AnimatedBackground />
+
+      {/* Botoes de navegacao */}
+      <div className="absolute top-4 right-4 flex gap-2">
+        <Link
+          href="/"
+          className="h-9 px-3 rounded-lg bg-white/90 backdrop-blur-sm border border-blue-100 flex items-center gap-2 text-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-colors shadow-md text-sm font-medium"
+          title="Pagina inicial"
+        >
+          <Home className="h-4 w-4" />
+          <span className="hidden sm:inline">Inicio</span>
+        </Link>
+        <Link
+          href="/register/patient"
+          className="h-9 px-3 rounded-lg bg-white/90 backdrop-blur-sm border border-blue-100 flex items-center gap-2 text-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-colors shadow-md text-sm font-medium"
+          title="Cadastro de paciente"
+        >
+          <User className="h-4 w-4" />
+          <span className="hidden sm:inline">Paciente</span>
+        </Link>
+        <Link
+          href="/register/doctor"
+          className="h-9 px-3 rounded-lg bg-white/90 backdrop-blur-sm border border-blue-100 flex items-center gap-2 text-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-colors shadow-md text-sm font-medium"
+          title="Cadastro de medico"
+        >
+          <Stethoscope className="h-4 w-4" />
+          <span className="hidden sm:inline">Medico</span>
+        </Link>
+      </div>
 
       <Card className="w-full max-w-md shadow-xl border border-blue-100 bg-white/90 backdrop-blur-sm">
         <CardHeader className="space-y-1 text-center">
@@ -233,7 +261,7 @@ export default function LoginPage() {
             <p className="text-sm text-center text-blue-600/70">
               Nao tem uma conta?{' '}
               <Link
-                href="/register"
+                href="/register/patient"
                 className="text-blue-600 font-medium hover:text-blue-800 hover:underline transition-colors"
               >
                 Cadastre-se
