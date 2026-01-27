@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -31,6 +31,7 @@ import {
   Trash2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SimpleAnimatedBackground } from '@/components/shared/SimpleAnimatedBackground'
 import {
   LineChart,
   Line,
@@ -103,74 +104,6 @@ const mockNotifications: Notification[] = [
   },
 ]
 
-// Subtle background component
-function SubtleBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    let animationId: number
-
-    const resize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      // Gradient background suave
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
-      gradient.addColorStop(0, '#f8fafc')
-      gradient.addColorStop(0.5, '#f1f5f9')
-      gradient.addColorStop(1, '#e2e8f0')
-      ctx.fillStyle = gradient
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // Desenhar circulos sutis
-      const time = Date.now() * 0.0001
-      for (let i = 0; i < 5; i++) {
-        const x = canvas.width * (0.2 + i * 0.15) + Math.sin(time + i) * 20
-        const y = canvas.height * (0.3 + (i % 2) * 0.4) + Math.cos(time + i) * 20
-        const radius = 100 + i * 50
-
-        const circleGradient = ctx.createRadialGradient(x, y, 0, x, y, radius)
-        circleGradient.addColorStop(0, 'rgba(59, 130, 246, 0.03)')
-        circleGradient.addColorStop(1, 'rgba(59, 130, 246, 0)')
-
-        ctx.beginPath()
-        ctx.arc(x, y, radius, 0, Math.PI * 2)
-        ctx.fillStyle = circleGradient
-        ctx.fill()
-      }
-
-      animationId = requestAnimationFrame(animate)
-    }
-
-    resize()
-    animate()
-
-    window.addEventListener('resize', resize)
-
-    return () => {
-      cancelAnimationFrame(animationId)
-      window.removeEventListener('resize', resize)
-    }
-  }, [])
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 -z-10"
-    />
-  )
-}
-
 export default function PatientDashboard() {
   const router = useRouter()
   const [user, setUser] = useState<SessionUser | null>(null)
@@ -240,7 +173,7 @@ export default function PatientDashboard() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SubtleBackground />
+      <SimpleAnimatedBackground />
 
       {/* Overlay para sidebar */}
       {(sidebarOpen || notificationsOpen) && (
